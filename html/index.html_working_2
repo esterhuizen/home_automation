@@ -1,0 +1,53 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script src="/jquery.js"></script>
+    <script type="text/javascript">
+                        google.load("visualization", "1", {packages:["corechart"]});
+                        google.setOnLoadCallback(main);
+
+    function main() {
+
+        var query = { "date": { "$gte": 'ISODate("2014-01-29T00:00:00.000Z")', $lt: 'ISODate("2014-02-01T00:00:00.000Z")' }};
+        var mQuery = $.param( query );
+
+        $.ajax({
+                type: "GET",
+                url: "https://api.mongohq.com/databases/home_automation/collections/loungeTemp/documents?_apikey=gvlCNp6RBC5xjFlPWbQcBA78kLg1Rq6Cdhhpjxs06Dw&limit=100&skip=400",
+                complete: function(data){ 
+
+                        var tempData = JSON.parse(data.responseText);
+                        
+                        var gcdata;
+                        gcdata = [["Time", "Lounge Temp"]];
+                        for(var i=0; i < tempData.length; i++) {
+                            gcdata.push([tempData[i].date, tempData[i].lounge_temp]);
+                        }
+
+                        var options = {
+                                title: 'House Temperatures'
+                        };
+                        
+                        drawChart(gcdata, options);
+                },
+                dataType: "json"
+        });
+
+        function drawChart(gcdata, options) {
+            var dtdata = google.visualization.arrayToDataTable( gcdata );
+
+            var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+            chart.draw(dtdata, options);
+        }
+
+    }
+
+    </script>
+  </head>
+  <body>
+    <div id="weather">
+   <a href="http://www.showmyweather.com/nz/auckland/" title="Auckland New Zealand Weather Forecast" onclick="window.open(this.href);return(false);"><script type="text/javascript" src="http://www.showmyweather.com/weather_widget.php?int=1&type=js&country=nz&state=&city=Auckland&smallicon=0&current=1&forecast=1&background_color=ffffff&color=000000&width=175&padding=10&border_width=1&border_color=000000&font_size=11&font_family=Verdana&showicons=1&measure=&d=2014-02-07"></script></a><div style="width:197px;text-align:center;font-size:0.6em;margin-top:0.5em;"><a href="http://www.showmyweather.com/widget/">Free Weather Widget</a></div> 
+    </div>
+    <div id="chart_div" style="width: 900px; height: 500px;"></div>
+  </body>
+</html>

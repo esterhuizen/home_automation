@@ -1,0 +1,53 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script src="/jquery.js"></script>
+    <script type="text/javascript">
+                        google.load("visualization", "1", {packages:["corechart"]});
+                        google.setOnLoadCallback(main);
+
+    function main() {
+
+        var query = { "date": { "$gte": 'ISODate("2014-01-29T00:00:00.000Z")', $lt: 'ISODate("2014-02-01T00:00:00.000Z")' }};
+        var mQuery = $.param( query );
+
+        $.ajax({
+                type: "GET",
+                url: "https://api.mongohq.com/databases/home_automation/collections/loungeTemp/documents?_apikey=gvlCNp6RBC5xjFlPWbQcBA78kLg1Rq6Cdhhpjxs06Dw&limit=100&skip=400",
+                complete: function(data){ 
+
+                        var tempData = JSON.parse(data.responseText);
+                        
+                        var gcdata;
+                        gcdata = [["Time", "Lounge Temp"]];
+                        for(var i=0; i < tempData.length; i++) {
+                            gcdata.push([tempData[i].date, tempData[i].lounge_temp]);
+                        }
+
+                        $("#result").append("<p>"+ JSON.stringify(gcdata) +"</p>");
+
+                        var options = {
+                                title: 'House Temperatures'
+                        };
+                        
+                        drawChart(gcdata, options);
+                },
+                dataType: "json"
+        });
+
+        function drawChart(gcdata, options) {
+            var dtdata = google.visualization.arrayToDataTable( gcdata );
+
+            var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+            chart.draw(dtdata, options);
+        }
+
+    }
+
+    </script>
+  </head>
+  <body>
+    <div id="chart_div" style="width: 900px; height: 500px;"></div>
+    <div id="result" style="border: 1px solid; width: 900px; height: 500px;"></div>
+  </body>
+</html>

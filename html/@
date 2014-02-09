@@ -1,0 +1,100 @@
+<html>
+  <head>
+    <META HTTP-EQUIV="refresh" CONTENT="300">
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script src="/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript">
+                        google.load("visualization", "1", {packages:["corechart"]});
+                        google.setOnLoadCallback(main);
+
+
+    function getCount() {
+
+        $.ajax( "https://api.mongohq.com/databases/home_automation/collections/loungeTemp?_apikey=gvlCNp6RBC5xjFlPWbQcBA78kLg1Rq6Cdhhpjxs06Dw&limit=100&skip=400"
+        ).done( function(data1, testStatus, request){
+               var count = data1.count - 96;
+               drawTempChart(count); 
+        });
+    }
+
+    function drawTempChart(count) {
+
+        $.ajax( "https://api.mongohq.com/databases/home_automation/collections/loungeTemp/documents?_apikey=gvlCNp6RBC5xjFlPWbQcBA78kLg1Rq6Cdhhpjxs06Dw&limit=100&skip="+ count
+        ).done( function(data, testStatus, request){
+                doChart(data);
+        });
+    }
+
+    function drawChart(gcdata, options) {
+        var dtdata = google.visualization.arrayToDataTable( gcdata );
+
+        var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+        chart.draw(dtdata, options);
+    }
+
+    function doChart(d) {
+       var tempData = d;
+
+       var gcdata;
+       gcdata = [["Time", "Lounge Temp"]]; 
+       var num = tempData.length;
+       for(var i=0; i < num; i++) {
+       temp = parseFloat(tempData[i].lounge_temp).toFixed(1);
+           gcdata.push([tempData[i].date, parseFloat(temp)]);
+       }
+
+       var currTemp = parseFloat(tempData[num-1].lounge_temp).toFixed(1);
+
+       $('#currentTemp').append("<p>Current lounge Temperature is <span id=Temp>"+ currTemp +" &degC</span></p>");
+       var options = {
+               title: 'House Temperatures'
+       };
+
+       drawChart(gcdata, options);
+    }
+
+    function main() {
+
+        var query = { "date": { "$gte": 'ISODate("2014-01-29T00:00:00.000Z")', $lt: 'ISODate("2014-02-01T00:00:00.000Z")' }};
+        var mQuery = $.param( query );
+
+        getCount();
+    }
+
+    </script>
+    <style>
+@keyframes blink {  
+    0% { color: red; }
+    50% { color: black; }
+}
+@-webkit-keyframes blink {
+    0% { color: red; }
+    50% { color: black; }
+}
+.blink {
+    -webkit-animation: blink 0.5s linear infinite;
+    -moz-animation: blink 0.5s linear infinite;
+    animation: blink 0.5s linear infinite;
+}
+#currentTemp { margin: 20px;}
+#currentTemp p { color: black; text-align: center}
+#currentTemp p span { color: blue; font-weight: bold; text-align: center}
+@keyframes blink {
+        0% {color: blue}
+        50% color: black}
+}
+.left {float:left; }
+.right {float:left; }
+
+    </style>
+  </head>
+  <body>
+   <div id='container'>
+    <div id="currentTemp" class="left" style="width: 250px; height: 30px;"></div>
+    <div id="weather" class="left">
+   <a href="http://www.showmyweather.com/nz/auckland/" title="Auckland New Zealand Weather Forecast" onclick="window.open(this.href);return(false);"><script type="text/javascript" src="http://www.showmyweather.com/weather_widget.php?int=1&type=js&country=nz&state=&city=Auckland&smallicon=0&current=1&forecast=1&background_color=ffffff&color=000000&width=175&padding=10&border_width=1&border_color=000000&font_size=11&font_family=Verdana&showicons=1&measure=&d=2014-02-07"></script></a><div style="width:197px;text-align:center;font-size:0.6em;margin-top:0.5em;"><a href="http://www.showmyweather.com/widget/">Free Weather Widget</a></div> 
+    </div>
+    <div id="chart_div" class="left" style="width: 900px; height: 500px;"></div>
+   </div>
+  </body>
+</html>
