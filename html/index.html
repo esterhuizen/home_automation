@@ -49,6 +49,7 @@
        var layers       = parseFloat(tempData[num-1].layers);
        var windSpeed    = parseFloat(tempData[num-1].windSpeed).toFixed(1);
        var variance     = feelsLike - loungeTemp
+       variance = parseFloat(variance).toFixed(1);
 
        $('#currentTemp').append("<p>You could wear <span class=\"BoldBlue\">"+ layers +"</span> layer of clothing outside</p>");
        $('#currentTemp').append("<p>Current lounge temperature is   <span class=\"BigFont\">"+ loungeTemp +" &degC</span></p>");
